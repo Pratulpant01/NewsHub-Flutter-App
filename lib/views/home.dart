@@ -5,6 +5,8 @@ import 'package:newshub/helper/data.dart';
 import 'package:newshub/helper/news.dart';
 import 'package:newshub/models/article_model.dart';
 import 'package:newshub/models/category_model.dart';
+import 'package:newshub/views/articleview.dart';
+import 'package:newshub/views/category_news.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -89,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           itemCount: articles.length,
                           itemBuilder: (context, index) {
                             return BlogTile(
+                              url: articles[index].url,
                               imgUrl: articles[index].urlToImage,
                               title: articles[index].title,
                               description: articles[index].description,
@@ -111,7 +114,15 @@ class CategoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                CategoryNews(category: categoryName.toString().toLowerCase()),
+          ),
+        );
+      },
       child: Container(
         margin: EdgeInsets.only(
           right: 16,
@@ -151,49 +162,62 @@ class CategoryTile extends StatelessWidget {
 }
 
 class BlogTile extends StatelessWidget {
-  final String imgUrl, title, description;
+  final String imgUrl, title, description, url;
   const BlogTile(
       {Key? key,
       required this.imgUrl,
+      required this.url,
       required this.title,
       required this.description})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(children: [
-        ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(imgUrl)),
-        SizedBox(
-          height: 8,
-        ),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.aleo(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ArticleView(
+              webUrl: url,
+            ),
           ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        SizedBox(
-          height: 8,
-        ),
-        Text(
-          description,
-          style: GoogleFonts.alatsi(
-            color: Colors.grey[700],
+        );
+      },
+      child: Container(
+        child: Column(children: [
+          ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(imgUrl)),
+          SizedBox(
+            height: 8,
           ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        SizedBox(
-          height: 8,
-        ),
-      ]),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.aleo(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(
+            height: 8,
+          ),
+          Text(
+            description,
+            style: GoogleFonts.alatsi(
+              color: Colors.grey[700],
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(
+            height: 8,
+          ),
+        ]),
+      ),
     );
   }
 }
