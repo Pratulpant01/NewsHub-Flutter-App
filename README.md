@@ -1,4 +1,5 @@
 # newshub
+![](https://github.com/Pratulpant01/NewsHub-Flutter-App/blob/master/NewsHub.gif)
 
 A new Flutter project.
 
