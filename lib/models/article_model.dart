@@ -12,4 +12,9 @@ class ArticleModel {
     required this.urlToImage,
     required this.content,
   });
+
+  @override
+  String toString() {
+    return 'ArticleModel(description: $description, title: $title, url: $url, urlToImage: $urlToImage, content: $content)';
+  }
 }

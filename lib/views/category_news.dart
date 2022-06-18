@@ -58,6 +58,7 @@ class _CategoryNewsState extends State<CategoryNews> {
                   horizontal: 16,
                 ),
                 child: ListView.builder(
+                    shrinkWrap: true,
                     itemCount: articles.length,
                     itemBuilder: (context, index) {
                       return BlogTile(

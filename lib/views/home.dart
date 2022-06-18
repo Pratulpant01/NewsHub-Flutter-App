@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:newshub/bloc/news_bloc.dart';
 import 'package:newshub/helper/data.dart';
 import 'package:newshub/helper/news.dart';
 import 'package:newshub/models/article_model.dart';
@@ -17,91 +19,87 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _loading = true;
-  List<CategoryModel> categories = [];
+  List<CategoryModel> categories = getCategories();
   List<ArticleModel> articles = [];
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    categories = getCategories();
-    getNews();
-  }
-
-  getNews() async {
-    News news = News();
-    await news.getNews();
-    articles = news.newsList;
-
-    setState(() {
-      _loading = false;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        title: Text(
-          'NewsHub',
-          style: GoogleFonts.aclonica(
-            fontWeight: FontWeight.bold,
-            color: Colors.deepPurple,
+    return BlocProvider(
+      create: (context) => NewsBloc(
+        RepositoryProvider.of<News>(context),
+      )..add(GetNewsApi()),
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          title: Text(
+            'NewsHub',
+            style: GoogleFonts.aclonica(
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple,
+            ),
           ),
         ),
-      ),
-      body: _loading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : SingleChildScrollView(
-              child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16,
+        body: SingleChildScrollView(
+          child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 16,
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                    ),
+                    height: 70,
+                    child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        shrinkWrap: true,
+                        itemCount: categories.length,
+                        itemBuilder: (context, index) {
+                          return CategoryTile(
+                            imageUrl: categories[index].imageUrl,
+                            categoryName: categories[index].categoryName,
+                          );
+                        }),
                   ),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
-                        height: 70,
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
+                  Container(
+                    padding: EdgeInsets.only(
+                      top: 16,
+                    ),
+                    child: BlocBuilder<NewsBloc, NewsState>(
+                      builder: (context, state) {
+                        if (state is NewsLoading) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (state is NewsLoaded) {
+                          print(state.newsData);
+                          return ListView.builder(
                             shrinkWrap: true,
-                            itemCount: categories.length,
+                            physics: ClampingScrollPhysics(),
+                            scrollDirection: Axis.vertical,
+                            itemCount: state.newsData.length,
                             itemBuilder: (context, index) {
-                              return CategoryTile(
-                                imageUrl: categories[index].imageUrl,
-                                categoryName: categories[index].categoryName,
+                              return BlogTile(
+                                url: state.newsData[index].url,
+                                imgUrl: state.newsData[index].urlToImage,
+                                title: state.newsData[index].title,
+                                description: state.newsData[index].description,
                               );
-                            }),
-                      ),
-                      Container(
-                        padding: EdgeInsets.only(
-                          top: 16,
-                        ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: ClampingScrollPhysics(),
-                          scrollDirection: Axis.vertical,
-                          itemCount: articles.length,
-                          itemBuilder: (context, index) {
-                            return BlogTile(
-                              url: articles[index].url,
-                              imgUrl: articles[index].urlToImage,
-                              title: articles[index].title,
-                              description: articles[index].description,
-                            );
-                          },
-                        ),
-                      )
-                    ],
-                  )),
-            ),
+                            },
+                          );
+                        }
+                        return Container();
+                      },
+                    ),
+                  )
+                ],
+              )),
+        ),
+      ),
     );
   }
 }
